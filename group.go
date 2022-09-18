@@ -2,6 +2,8 @@ package pond
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"sync"
 )
 
@@ -56,6 +58,35 @@ func (g *TaskGroupWithContext) Submit(task func() error) {
 
 		// don't actually ignore errors
 		err := task()
+		if err != nil {
+			g.errOnce.Do(func() {
+				g.err = err
+				if g.cancel != nil {
+					g.cancel()
+				}
+			})
+		}
+	})
+}
+
+func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interface{}) (map[string]interface{}, error), args map[string]interface{}) {
+	g.waitGroup.Add(1)
+
+	g.pool.Submit(func() {
+		defer g.waitGroup.Done()
+
+		// If context has already been cancelled, skip task execution
+		if g.ctx != nil {
+			select {
+			case <-g.ctx.Done():
+				return
+			default:
+			}
+		}
+
+		// don't actually ignore errors
+		res, err := task(args)
+		fmt.Fprintf(os.Stdout, "results: %+v \n", res)
 		if err != nil {
 			g.errOnce.Do(func() {
 				g.err = err

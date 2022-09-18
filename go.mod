@@ -1,3 +1,3 @@
-module github.com/alitto/pond
+module github.com/kraneware/pond
 
-go 1.19
+go 1.18
