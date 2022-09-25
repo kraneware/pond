@@ -2,8 +2,6 @@ package pond
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"sync"
 )
 
@@ -69,7 +67,7 @@ func (g *TaskGroupWithContext) Submit(task func() error) {
 	})
 }
 
-func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interface{}) (map[string]interface{}, error), args map[string]interface{}) {
+func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interface{}) error, args map[string]interface{}) {
 	g.waitGroup.Add(1)
 
 	g.pool.Submit(func() {
@@ -85,8 +83,7 @@ func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interfac
 		}
 
 		// don't actually ignore errors
-		res, err := task(args)
-		fmt.Fprintf(os.Stdout, "results: %+v \n", res)
+		err := task(args)
 		if err != nil {
 			g.errOnce.Do(func() {
 				g.err = err
