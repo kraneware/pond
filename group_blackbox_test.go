@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alitto/pond"
+	"github.com/kraneware/pond"
 )
 
 func TestGroupSubmit(t *testing.T) {

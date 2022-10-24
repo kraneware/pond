@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alitto/pond"
+	"github.com/kraneware/pond"
 )
 
 func assertEqual(t *testing.T, expected interface{}, actual interface{}) {
