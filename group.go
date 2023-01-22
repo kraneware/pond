@@ -74,6 +74,7 @@ func (g *TaskGroupWithContext) Submit(task func() error) {
 	})
 }
 
+// SubmitWithArgs adds a task(args map[string]interface{}) to this group and sends it to the worker pool to be executed
 func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interface{}) error, args map[string]interface{}) {
 	g.waitGroup.Add(1)
 
@@ -92,8 +93,11 @@ func (g *TaskGroupWithContext) SubmitWithArgs(task func(args map[string]interfac
 		// don't actually ignore errors
 		err := task(args)
 		if err != nil {
-			g.errOnce.Do(func() {
+			g.errSync.once.Do(func() {
+				g.errSync.guard.Lock()
 				g.err = err
+				g.errSync.guard.Unlock()
+
 				if g.cancel != nil {
 					g.cancel()
 				}
